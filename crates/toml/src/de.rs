@@ -4,15 +4,17 @@
 //! into Rust structures. Note that some top-level functions here are also
 //! provided at the top of the crate.
 
-use std::borrow::Cow;
-use std::collections::HashMap;
-use std::error;
-use std::f64;
-use std::fmt;
-use std::iter;
-use std::marker::PhantomData;
-use std::str;
-use std::vec;
+use alloc::borrow::{Cow, ToOwned};
+use alloc::boxed::Box;
+use alloc::string::String;
+use alloc::string::ToString;
+use alloc::vec::Vec;
+use alloc::vec;
+use core::fmt;
+use core::marker::PhantomData;
+use core::{iter};
+use core::hash::Hasher;
+use hashbrown::HashMap;
 
 use serde::de;
 use serde::de::value::BorrowedStrDeserializer;
@@ -33,7 +35,7 @@ pub fn from_slice<'de, T>(bytes: &'de [u8]) -> Result<T, Error>
 where
     T: de::Deserialize<'de>,
 {
-    match str::from_utf8(bytes) {
+    match core::str::from_utf8(bytes) {
         Ok(s) => from_str(s),
         Err(e) => Err(Error::custom(None, e.to_string())),
     }
@@ -318,6 +320,32 @@ impl<'de, 'b> de::Deserializer<'de> for &'b mut Deserializer<'de> {
     }
 }
 
+struct BadHashBuilder;
+
+#[derive(Default)]
+struct BadHasher{
+    val: u64,
+}
+
+impl Hasher for BadHasher {
+    fn finish(&self) -> u64 {
+        self.val
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        for byte in bytes {
+            self.val = self.val.overflowing_add(*byte as u64).0;
+        }
+    }
+}
+
+impl core::hash::BuildHasher for BadHashBuilder {
+    type Hasher = BadHasher;
+
+    fn build_hasher(&self) -> Self::Hasher {
+        BadHasher::default()
+    }
+}
 // Builds a datastructure that allows for efficient sublinear lookups.
 // The returned HashMap contains a mapping from table header (like [a.b.c])
 // to list of tables with that precise name. The tables are being identified
@@ -328,8 +356,8 @@ impl<'de, 'b> de::Deserializer<'de> for &'b mut Deserializer<'de> {
 // The lookup is performed in the `SeqAccess` implementation of `MapVisitor`.
 // The lists are ordered, which we exploit in the search code by using
 // bisection.
-fn build_table_indices<'de>(tables: &[Table<'de>]) -> HashMap<Vec<Cow<'de, str>>, Vec<usize>> {
-    let mut res = HashMap::new();
+fn build_table_indices<'de>(tables: &[Table<'de>]) -> HashMap<Vec<Cow<'de, str>>, Vec<usize>, BadHashBuilder> {
+    let mut res = HashMap::with_hasher(BadHashBuilder);
     for (i, table) in tables.iter().enumerate() {
         let header = table.header.iter().map(|v| v.1.clone()).collect::<Vec<_>>();
         res.entry(header).or_insert_with(Vec::new).push(i);
@@ -352,8 +380,8 @@ fn build_table_indices<'de>(tables: &[Table<'de>]) -> HashMap<Vec<Cow<'de, str>>
 // The lookup is performed in the `MapAccess` implementation of `MapVisitor`.
 // The lists are ordered, which we exploit in the search code by using
 // bisection.
-fn build_table_pindices<'de>(tables: &[Table<'de>]) -> HashMap<Vec<Cow<'de, str>>, Vec<usize>> {
-    let mut res = HashMap::new();
+fn build_table_pindices<'de>(tables: &[Table<'de>]) -> HashMap<Vec<Cow<'de, str>>, Vec<usize>, BadHashBuilder> {
+    let mut res = HashMap::with_hasher(BadHashBuilder);
     for (i, table) in tables.iter().enumerate() {
         let header = table.header.iter().map(|v| v.1.clone()).collect::<Vec<_>>();
         for len in 0..=header.len() {
@@ -386,8 +414,8 @@ struct MapVisitor<'de, 'b> {
     cur: usize,
     cur_parent: usize,
     max: usize,
-    table_indices: &'b HashMap<Vec<Cow<'de, str>>, Vec<usize>>,
-    table_pindices: &'b HashMap<Vec<Cow<'de, str>>, Vec<usize>>,
+    table_indices: &'b HashMap<Vec<Cow<'de, str>>, Vec<usize>, BadHashBuilder>,
+    table_pindices: &'b HashMap<Vec<Cow<'de, str>>, Vec<usize>, BadHashBuilder>,
     tables: &'b mut [Table<'de>],
     array: bool,
     de: &'b mut Deserializer<'de>,
@@ -734,7 +762,7 @@ impl<'de> de::Deserializer<'de> for StrDeserializer<'de> {
     {
         match self.key {
             Cow::Borrowed(s) => visitor.visit_borrowed_str(s),
-            Cow::Owned(s) => visitor.visit_string(s),
+            Cow::Owned(s) => visitor.visit_str(&s),
         }
     }
 
@@ -799,7 +827,7 @@ impl<'de> de::Deserializer<'de> for ValueDeserializer<'de> {
             E::Boolean(b) => visitor.visit_bool(b),
             E::Float(f) => visitor.visit_f64(f),
             E::String(Cow::Borrowed(s)) => visitor.visit_borrowed_str(s),
-            E::String(Cow::Owned(s)) => visitor.visit_string(s),
+            E::String(Cow::Owned(s)) => visitor.visit_str(&s),
             E::Datetime(s) => visitor.visit_map(DatetimeDeserializer {
                 date: s,
                 visited: false,
@@ -2069,6 +2097,7 @@ impl Error {
     }
 }
 
+#[cfg(feature = "std")]
 impl std::convert::From<Error> for std::io::Error {
     fn from(e: Error) -> Self {
         std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string())
@@ -2157,7 +2186,8 @@ impl fmt::Display for Error {
     }
 }
 
-impl error::Error for Error {}
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
 
 impl de::Error for Error {
     fn custom<T: fmt::Display>(msg: T) -> Error {

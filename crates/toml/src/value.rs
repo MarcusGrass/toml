@@ -1,12 +1,16 @@
 //! Definition of a TOML value
 
-use std::collections::{BTreeMap, HashMap};
-use std::fmt;
-use std::hash::Hash;
-use std::mem::discriminant;
-use std::ops;
-use std::str::FromStr;
-use std::vec;
+use alloc::str::FromStr;
+use alloc::string::{String, ToString};
+use alloc::vec;
+use alloc::vec::Vec;
+use alloc::format;
+use alloc::borrow::ToOwned;
+use core::fmt;
+use core::hash::Hash;
+use core::mem::discriminant;
+use core::ops;
+use hashbrown::HashMap;
 
 use serde::de;
 use serde::de::IntoDeserializer;
@@ -263,8 +267,8 @@ impl<V: Into<Value>> From<Vec<V>> for Value {
     }
 }
 
-impl<S: Into<String>, V: Into<Value>> From<BTreeMap<S, V>> for Value {
-    fn from(val: BTreeMap<S, V>) -> Value {
+impl<S: Into<String>, V: Into<Value>> From<alloc::collections::BTreeMap<S, V>> for Value {
+    fn from(val: alloc::collections::BTreeMap<S, V>) -> Value {
         let table = val.into_iter().map(|(s, v)| (s.into(), v.into())).collect();
 
         Value::Table(table)
@@ -420,7 +424,7 @@ impl ser::Serialize for Value {
                             .map(|a| !a.iter().any(|v| v.is_table()))
                             .unwrap_or(false))
                     {
-                        map.serialize_entry(k, v)?;
+                        map.serialize_entry(k.as_str(), v)?;
                     }
                 }
                 for (k, v) in t {
@@ -428,12 +432,12 @@ impl ser::Serialize for Value {
                         .map(|a| a.iter().any(|v| v.is_table()))
                         .unwrap_or(false)
                     {
-                        map.serialize_entry(k, v)?;
+                        map.serialize_entry(k.as_str(), v)?;
                     }
                 }
                 for (k, v) in t {
                     if v.is_table() {
-                        map.serialize_entry(k, v)?;
+                        map.serialize_entry(k.as_str(), v)?;
                     }
                 }
                 map.end()
@@ -554,7 +558,7 @@ impl<'de> de::Deserializer<'de> for Value {
             Value::Integer(n) => visitor.visit_i64(n),
             Value::Float(n) => visitor.visit_f64(n),
             Value::String(v) => visitor.visit_string(v),
-            Value::Datetime(v) => visitor.visit_string(v.to_string()),
+            Value::Datetime(v) => visitor.visit_str(v.to_string().as_str()),
             Value::Array(v) => {
                 let len = v.len();
                 let mut deserializer = SeqDeserializer::new(v);

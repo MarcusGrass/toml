@@ -36,4 +36,4 @@ default = ["std"]
 std = []
 
 [dependencies]
-serde = { version = "1.0.145", optional = true }
+serde = { version = "1.0.145", optional = true, default-features = false, features = ["alloc"] }

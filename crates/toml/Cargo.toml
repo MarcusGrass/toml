@@ -37,17 +37,18 @@ pre-release-replacements = [
 
 [features]
 default = ["std"]
-std = []
+std = ["serde/default", "toml_datetime/std"]
 
 # Use indexmap rather than BTreeMap as the map type of toml::Value.
 # This allows data to be read into a Value and written back to a TOML string
 # while preserving the order of map keys in the input.
-preserve_order = ["indexmap"]
+preserve_order = ["indexmap", "std"]
 
 [dependencies]
-serde = "1.0.145"
+hashbrown = { version = "0.12.3", default-features = false}
 indexmap = { version = "1.9.1", optional = true }
-toml_datetime = { version = "0.5.0", path = "../toml_datetime", features = ["serde"] }
+serde = { version = "1.0.145", default-features = false, features = ["alloc"] }
+toml_datetime = { version = "0.5.0", path = "../toml_datetime", default-features = false, features = ["serde"] }
 
 [dev-dependencies]
 serde_derive = "1.0.149"

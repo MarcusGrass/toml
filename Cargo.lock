@@ -865,6 +865,7 @@ dependencies = [
 name = "toml"
 version = "0.5.9"
 dependencies = [
+ "hashbrown",
  "indexmap",
  "serde",
  "serde_derive",

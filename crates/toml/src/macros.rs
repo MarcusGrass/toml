@@ -1,6 +1,7 @@
 pub use serde::de::{Deserialize, IntoDeserializer};
 
 use crate::value::{Array, Table, Value};
+use alloc::borrow::ToOwned;
 
 /// Construct a [`toml::Value`] from TOML syntax.
 ///

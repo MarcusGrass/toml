@@ -25,11 +25,12 @@
 //! # fn main() {}
 //! ```
 
-use std::cell::Cell;
-use std::error;
-use std::fmt::{self, Write};
-use std::marker;
-use std::rc::Rc;
+use alloc::string::{String, ToString};
+use alloc::rc::Rc;
+use alloc::vec::Vec;
+use core::cell::Cell;
+use core::fmt::{self, Write};
+use core::marker;
 
 use serde::ser;
 use toml_datetime::__unstable as datetime;
@@ -1542,7 +1543,8 @@ impl fmt::Display for Error {
     }
 }
 
-impl error::Error for Error {}
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
 
 impl ser::Error for Error {
     fn custom<T: fmt::Display>(msg: T) -> Error {
