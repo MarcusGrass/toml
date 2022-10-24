@@ -1,7 +1,6 @@
-use std::error;
-use std::fmt;
-use std::str::{self, FromStr};
-
+use alloc::format;
+use core::fmt;
+use core::str::FromStr;
 #[cfg(feature = "serde")]
 use serde::{de, ser};
 
@@ -436,7 +435,7 @@ impl FromStr for Datetime {
     }
 }
 
-fn digit(chars: &mut str::Chars<'_>) -> Result<u8, DatetimeParseError> {
+fn digit(chars: &mut core::str::Chars<'_>) -> Result<u8, DatetimeParseError> {
     match chars.next() {
         Some(c) if ('0'..='9').contains(&c) => Ok(c as u8 - b'0'),
         _ => Err(DatetimeParseError { _private: () }),
@@ -450,6 +449,7 @@ impl ser::Serialize for Datetime {
         S: ser::Serializer,
     {
         use serde::ser::SerializeStruct;
+        use alloc::string::ToString;
 
         let mut s = serializer.serialize_struct(NAME, 1)?;
         s.serialize_field(FIELD, &self.to_string())?;
@@ -567,4 +567,5 @@ impl fmt::Display for DatetimeParseError {
     }
 }
 
-impl error::Error for DatetimeParseError {}
+#[cfg(feature = "std")]
+impl std::error::Error for DatetimeParseError {}

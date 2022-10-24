@@ -1,7 +1,7 @@
 //! A [TOML]-compatible datetime type
 //!
 //! [TOML]: https://github.com/toml-lang/toml
-
+#![cfg_attr(all(not(test), feature = "std"), no_std)]
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
 // Makes rustc abort compilation if there are any unsafe blocks in the crate.
@@ -9,6 +9,10 @@
 // and lets them ensure that there is indeed no unsafe code as opposed to
 // something they couldn't detect (e.g. unsafe added via macro expansion, etc).
 #![forbid(unsafe_code)]
+
+extern crate alloc;
+#[cfg(feature = "std")]
+extern crate std;
 
 mod datetime;
 

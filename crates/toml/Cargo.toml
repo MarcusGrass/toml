@@ -36,7 +36,8 @@ pre-release-replacements = [
 ]
 
 [features]
-default = []
+default = ["std"]
+std = []
 
 # Use indexmap rather than BTreeMap as the map type of toml::Value.
 # This allows data to be read into a Value and written back to a TOML string
