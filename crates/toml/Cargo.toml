@@ -37,7 +37,7 @@ pre-release-replacements = [
 
 [features]
 default = ["std"]
-std = ["serde/default", "toml_datetime/std"]
+std = ["serde/std", "toml_datetime/std"]
 
 # Use indexmap rather than BTreeMap as the map type of toml::Value.
 # This allows data to be read into a Value and written back to a TOML string
