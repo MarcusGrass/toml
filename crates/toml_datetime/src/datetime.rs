@@ -449,7 +449,7 @@ impl ser::Serialize for Datetime {
         S: ser::Serializer,
     {
         use serde::ser::SerializeStruct;
-        #[cfg(feature = "std")]
+        #[cfg(not(feature = "std"))]
         use alloc::string::ToString;
 
         let mut s = serializer.serialize_struct(NAME, 1)?;
