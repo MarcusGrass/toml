@@ -1,5 +1,5 @@
-use std::cmp::Ordering;
-use std::hash::{Hash, Hasher};
+use core::cmp::Ordering;
+use core::hash::{Hash, Hasher};
 
 // Currently serde itself doesn't have a spanned type, so we map our `Spanned`
 // to a special value in the serde data model. Namely one with these special
@@ -29,14 +29,14 @@ pub fn is_spanned(name: &'static str, fields: &'static [&'static str]) -> bool {
 #[derive(Clone, Debug)]
 pub struct Spanned<T> {
     /// Byte range
-    span: std::ops::Range<usize>,
+    span: core::ops::Range<usize>,
     /// The spanned value.
     value: T,
 }
 
 impl<T> Spanned<T> {
     /// Byte range
-    pub fn span(&self) -> std::ops::Range<usize> {
+    pub fn span(&self) -> core::ops::Range<usize> {
         self.span.clone()
     }
 
@@ -56,7 +56,7 @@ impl<T> Spanned<T> {
     }
 }
 
-impl std::borrow::Borrow<str> for Spanned<String> {
+impl core::borrow::Borrow<str> for Spanned<alloc::string::String> {
     fn borrow(&self) -> &str {
         self.get_ref()
     }
@@ -109,7 +109,7 @@ where
     where
         D: serde::de::Deserializer<'de>,
     {
-        struct SpannedVisitor<T>(::std::marker::PhantomData<T>);
+        struct SpannedVisitor<T>(::core::marker::PhantomData<T>);
 
         impl<'de, T> serde::de::Visitor<'de> for SpannedVisitor<T>
         where
@@ -117,7 +117,7 @@ where
         {
             type Value = Spanned<T>;
 
-            fn expecting(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            fn expecting(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 formatter.write_str("a spanned value")
             }
 
@@ -147,7 +147,7 @@ where
             }
         }
 
-        let visitor = SpannedVisitor(::std::marker::PhantomData);
+        let visitor = SpannedVisitor(::core::marker::PhantomData);
 
         static FIELDS: [&str; 3] = [START_FIELD, END_FIELD, VALUE_FIELD];
         deserializer.deserialize_struct(NAME, &FIELDS, visitor)

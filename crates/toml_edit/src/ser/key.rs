@@ -1,6 +1,9 @@
 use crate::InternalString;
 
 use super::Error;
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 pub(crate) struct KeySerializer;
 

@@ -1,4 +1,4 @@
-use std::ops;
+use core::ops;
 
 use crate::document::Document;
 use crate::key::Key;
@@ -7,6 +7,9 @@ use crate::{value, InlineTable, InternalString, Item, Table, Value};
 
 // copied from
 // https://github.com/serde-rs/json/blob/master/src/value/index.rs
+
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 
 pub trait Index: crate::private::Sealed {
     #[doc(hidden)]

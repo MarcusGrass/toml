@@ -1,6 +1,9 @@
-use std::borrow::Cow;
+use alloc::borrow::Cow;
 
 use crate::RawString;
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 /// A value together with its `to_string` representation,
 /// including surrounding it whitespaces and comments.
@@ -59,7 +62,7 @@ where
     }
 
     /// Returns the location within the original document
-    pub(crate) fn span(&self) -> Option<std::ops::Range<usize>> {
+    pub(crate) fn span(&self) -> Option<core::ops::Range<usize>> {
         self.repr.as_ref().and_then(|r| r.span())
     }
 
@@ -86,12 +89,12 @@ where
     }
 }
 
-impl<T> std::fmt::Debug for Formatted<T>
+impl<T> core::fmt::Debug for Formatted<T>
 where
-    T: std::fmt::Debug,
+    T: core::fmt::Debug,
 {
     #[inline]
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         let mut d = formatter.debug_struct("Formatted");
         d.field("value", &self.value);
         match &self.repr {
@@ -103,11 +106,11 @@ where
     }
 }
 
-impl<T> std::fmt::Display for Formatted<T>
+impl<T> core::fmt::Display for Formatted<T>
 where
     T: ValueRepr,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         crate::encode::Encode::encode(self, f, None, ("", ""))
     }
 }
@@ -136,7 +139,7 @@ impl Repr {
     }
 
     /// Returns the location within the original document
-    pub(crate) fn span(&self) -> Option<std::ops::Range<usize>> {
+    pub(crate) fn span(&self) -> Option<core::ops::Range<usize>> {
         self.raw_value.span()
     }
 
@@ -144,14 +147,14 @@ impl Repr {
         self.raw_value.despan(input)
     }
 
-    pub(crate) fn encode(&self, buf: &mut dyn std::fmt::Write, input: &str) -> std::fmt::Result {
+    pub(crate) fn encode(&self, buf: &mut dyn core::fmt::Write, input: &str) -> core::fmt::Result {
         self.as_raw().encode(buf, input)
     }
 }
 
-impl std::fmt::Debug for Repr {
+impl core::fmt::Debug for Repr {
     #[inline]
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         self.raw_value.fmt(formatter)
     }
 }
@@ -187,10 +190,10 @@ impl Decor {
 
     pub(crate) fn prefix_encode(
         &self,
-        buf: &mut dyn std::fmt::Write,
+        buf: &mut dyn core::fmt::Write,
         input: Option<&str>,
         default: &str,
-    ) -> std::fmt::Result {
+    ) -> core::fmt::Result {
         if let Some(prefix) = self.prefix() {
             prefix.encode_with_default(buf, input, default)
         } else {
@@ -210,10 +213,10 @@ impl Decor {
 
     pub(crate) fn suffix_encode(
         &self,
-        buf: &mut dyn std::fmt::Write,
+        buf: &mut dyn core::fmt::Write,
         input: Option<&str>,
         default: &str,
-    ) -> std::fmt::Result {
+    ) -> core::fmt::Result {
         if let Some(suffix) = self.suffix() {
             suffix.encode_with_default(buf, input, default)
         } else {
@@ -236,9 +239,9 @@ impl Decor {
     }
 }
 
-impl std::fmt::Debug for Decor {
+impl core::fmt::Debug for Decor {
     #[inline]
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         let mut d = formatter.debug_struct("Decor");
         match &self.prefix {
             Some(r) => d.field("prefix", r),

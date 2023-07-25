@@ -1,5 +1,4 @@
 #![allow(missing_docs)]
-
 //! Document tree traversal to mutate an exclusive borrow of a document tree in place.
 //!
 //!
@@ -54,9 +53,9 @@
 //!     fn visit_value_mut(&mut self, node: &mut Value) {
 //!         if let Value::Float(f) = node {
 //!             // Convert the float to a string.
-//!             let mut s = Formatted::new(format!("{:.2}", f.value()));
+//!             let mut s = Formatted::new(alloc::format!("{:.2}", f.value()));
 //!             // Copy over the formatting.
-//!             std::mem::swap(s.decor_mut(), f.decor_mut());
+//!             core::mem::swap(s.decor_mut(), f.decor_mut());
 //!             *node = Value::String(s);
 //!         }
 //!         // Most of the time, you will also need to call the default implementation to recurse
@@ -79,7 +78,7 @@
 //! table = { apple = "4.50" }
 //! "#;
 //!
-//! assert_eq!(format!("{}", document), output);
+//! assert_eq!(alloc::format!("{}", document), output);
 //! ```
 //!
 //! For a more complex example where the visitor has internal state, see `examples/visit.rs`
@@ -89,6 +88,8 @@ use crate::{
     Array, ArrayOfTables, Datetime, Document, Formatted, InlineTable, Item, KeyMut, Table,
     TableLike, Value,
 };
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 
 /// Document tree traversal to mutate an exclusive borrow of a document tree in-place.
 ///

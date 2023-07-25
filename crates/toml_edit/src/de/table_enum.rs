@@ -1,5 +1,7 @@
 use crate::de::Error;
-
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 /// Deserializes table values into enum variants.
 pub(crate) struct TableEnumDeserializer {
     value: crate::Item,
@@ -31,7 +33,7 @@ impl<'de> serde::de::VariantAccess<'de> for TableEnumDeserializer {
                 }
             }
             e => Err(Error::custom(
-                format!("expected table, found {}", e.type_name()),
+                alloc::format!("expected table, found {}", e.type_name()),
                 e.span(),
             )),
         }
@@ -59,7 +61,7 @@ impl<'de> serde::de::VariantAccess<'de> for TableEnumDeserializer {
                         |(index, (_, value))| match value.key.get().parse::<usize>() {
                             Ok(key_index) if key_index == index => Ok(value.value),
                             Ok(_) | Err(_) => Err(Error::custom(
-                                format!(
+                                alloc::format!(
                                     "expected table key `{}`, but was `{}`",
                                     index,
                                     value.key.get()
@@ -87,7 +89,7 @@ impl<'de> serde::de::VariantAccess<'de> for TableEnumDeserializer {
                     )
                 } else {
                     Err(Error::custom(
-                        format!("expected tuple with length {}", len),
+                        alloc::format!("expected tuple with length {}", len),
                         values_span,
                     ))
                 }
@@ -102,7 +104,7 @@ impl<'de> serde::de::VariantAccess<'de> for TableEnumDeserializer {
                         |(index, (_, value))| match value.key.get().parse::<usize>() {
                             Ok(key_index) if key_index == index => Ok(value.value),
                             Ok(_) | Err(_) => Err(Error::custom(
-                                format!(
+                                alloc::format!(
                                     "expected table key `{}`, but was `{}`",
                                     index,
                                     value.key.get()
@@ -130,13 +132,13 @@ impl<'de> serde::de::VariantAccess<'de> for TableEnumDeserializer {
                     )
                 } else {
                     Err(Error::custom(
-                        format!("expected tuple with length {}", len),
+                        alloc::format!("expected tuple with length {}", len),
                         values_span,
                     ))
                 }
             }
             e => Err(Error::custom(
-                format!("expected table, found {}", e.type_name()),
+                alloc::format!("expected table, found {}", e.type_name()),
                 e.span(),
             )),
         }

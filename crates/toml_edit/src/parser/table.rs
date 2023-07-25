@@ -1,6 +1,6 @@
-use std::cell::RefCell;
+use core::cell::RefCell;
 #[allow(unused_imports)]
-use std::ops::DerefMut;
+use core::ops::DerefMut;
 
 use winnow::combinator::cut_err;
 use winnow::combinator::delimited;
@@ -13,6 +13,9 @@ use crate::parser::prelude::*;
 use crate::parser::state::ParseState;
 use crate::parser::trivia::line_trailing;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 // std-table-open  = %x5B ws     ; [ Left square bracket
 pub(crate) const STD_TABLE_OPEN: u8 = b'[';
 // std-table-close = ws %x5D     ; ] Right square bracket

@@ -15,6 +15,9 @@ use crate::{InlineTable, InternalString, Item, RawString, Value};
 
 use indexmap::map::Entry;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 // ;; Inline Table
 
 // inline-table = inline-table-open inline-table-keyvals inline-table-close

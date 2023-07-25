@@ -1,4 +1,4 @@
-use std::iter::FromIterator;
+use core::iter::FromIterator;
 
 use indexmap::map::IndexMap;
 
@@ -6,6 +6,12 @@ use crate::key::Key;
 use crate::repr::Decor;
 use crate::value::DEFAULT_VALUE_DECOR;
 use crate::{InlineTable, InternalString, Item, KeyMut, Value};
+use alloc::borrow::ToOwned;
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+use rustc_hash::FxHasher;
 
 /// Type representing a TOML non-inline table
 #[derive(Clone, Debug, Default)]
@@ -20,7 +26,7 @@ pub struct Table {
     //
     // `None` for user created tables (can be overridden with `set_position`)
     doc_position: Option<usize>,
-    pub(crate) span: Option<std::ops::Range<usize>>,
+    pub(crate) span: Option<core::ops::Range<usize>>,
     pub(crate) items: KeyValuePairs,
 }
 
@@ -125,20 +131,20 @@ impl Table {
     /// values or their combination as needed).
     pub fn sort_values_by<F>(&mut self, mut compare: F)
     where
-        F: FnMut(&Key, &Item, &Key, &Item) -> std::cmp::Ordering,
+        F: FnMut(&Key, &Item, &Key, &Item) -> core::cmp::Ordering,
     {
         self.sort_values_by_internal(&mut compare);
     }
 
     fn sort_values_by_internal<F>(&mut self, compare: &mut F)
     where
-        F: FnMut(&Key, &Item, &Key, &Item) -> std::cmp::Ordering,
+        F: FnMut(&Key, &Item, &Key, &Item) -> core::cmp::Ordering,
     {
         let modified_cmp = |_: &InternalString,
                             val1: &TableKeyValue,
                             _: &InternalString,
                             val2: &TableKeyValue|
-         -> std::cmp::Ordering {
+         -> core::cmp::Ordering {
             compare(&val1.key, &val1.value, &val2.key, &val2.value)
         };
 
@@ -225,7 +231,7 @@ impl Table {
     }
 
     /// Returns the location within the original document
-    pub(crate) fn span(&self) -> Option<std::ops::Range<usize>> {
+    pub(crate) fn span(&self) -> Option<core::ops::Range<usize>> {
         self.span.clone()
     }
 
@@ -413,8 +419,8 @@ impl Table {
     }
 }
 
-impl std::fmt::Display for Table {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for Table {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         use crate::encode::Encode;
         let children = self.get_values();
         // print table body
@@ -468,7 +474,8 @@ impl<'s> IntoIterator for &'s Table {
     }
 }
 
-pub(crate) type KeyValuePairs = IndexMap<InternalString, TableKeyValue>;
+pub(crate) type KeyValuePairs =
+    IndexMap<InternalString, TableKeyValue, core::hash::BuildHasherDefault<FxHasher>>;
 
 fn decorate_table(table: &mut Table) {
     for (key_decor, value) in table
@@ -715,7 +722,7 @@ impl<'a> OccupiedEntry<'a> {
 
     /// Sets the value of the entry, and returns the entry's old value
     pub fn insert(&mut self, mut value: Item) -> Item {
-        std::mem::swap(&mut value, &mut self.entry.get_mut().value);
+        core::mem::swap(&mut value, &mut self.entry.get_mut().value);
         value
     }
 

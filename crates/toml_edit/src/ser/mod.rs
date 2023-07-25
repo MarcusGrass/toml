@@ -8,6 +8,9 @@ mod map;
 mod pretty;
 mod value;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 pub(crate) use array::*;
 pub(crate) use key::*;
 pub(crate) use map::*;
@@ -35,7 +38,7 @@ pub enum Error {
 impl Error {
     pub(crate) fn custom<T>(msg: T) -> Self
     where
-        T: std::fmt::Display,
+        T: core::fmt::Display,
     {
         Error::Custom(msg.to_string())
     }
@@ -44,14 +47,14 @@ impl Error {
 impl serde::ser::Error for Error {
     fn custom<T>(msg: T) -> Self
     where
-        T: std::fmt::Display,
+        T: core::fmt::Display,
     {
         Self::custom(msg)
     }
 }
 
-impl std::fmt::Display for Error {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+impl core::fmt::Display for Error {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
         match self {
             Self::UnsupportedType(Some(t)) => write!(formatter, "unsupported {t} type"),
             Self::UnsupportedType(None) => write!(formatter, "unsupported rust type"),
@@ -77,6 +80,7 @@ impl From<Error> for crate::TomlError {
     }
 }
 
+#[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
 /// Serialize the given data structure as a TOML byte vector.

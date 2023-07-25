@@ -15,15 +15,18 @@
 //! [`IndexMap`]: https://docs.rs/indexmap
 
 use crate::value::Value;
+use core::borrow::Borrow;
+use core::fmt::{self, Debug};
+use core::hash::Hash;
+use core::iter::FromIterator;
+use core::ops;
 use serde::{de, ser};
-use std::borrow::Borrow;
-use std::fmt::{self, Debug};
-use std::hash::Hash;
-use std::iter::FromIterator;
-use std::ops;
+
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 
 #[cfg(not(feature = "preserve_order"))]
-use std::collections::{btree_map, BTreeMap};
+use alloc::collections::{btree_map, BTreeMap};
 
 #[cfg(feature = "preserve_order")]
 use indexmap::{self, IndexMap};
@@ -158,10 +161,10 @@ impl Map<String, Value> {
     where
         S: Into<String>,
     {
+        #[cfg(not(feature = "preserve_order"))]
+        use alloc::collections::btree_map::Entry as EntryImpl;
         #[cfg(feature = "preserve_order")]
         use indexmap::map::Entry as EntryImpl;
-        #[cfg(not(feature = "preserve_order"))]
-        use std::collections::btree_map::Entry as EntryImpl;
 
         match self.map.entry(key.into()) {
             EntryImpl::Vacant(vacant) => Entry::Vacant(VacantEntry { vacant }),

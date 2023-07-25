@@ -14,6 +14,9 @@ use crate::value as v;
 use crate::RawString;
 use crate::Value;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 // val = string / boolean / array / inline-table / date-time / float / integer
 pub(crate) fn value<'i>(check: RecursionCheck) -> impl Parser<Input<'i>, v::Value, ContextError> {
     move |input: &mut Input<'i>| {
@@ -87,7 +90,7 @@ pub(crate) fn value<'i>(check: RecursionCheck) -> impl Parser<Input<'i>, v::Valu
     }
 }
 
-fn apply_raw(mut val: Value, span: std::ops::Range<usize>) -> Result<Value, std::str::Utf8Error> {
+fn apply_raw(mut val: Value, span: core::ops::Range<usize>) -> Result<Value, core::str::Utf8Error> {
     match val {
         Value::String(ref mut f) => {
             let raw = RawString::with_span(span);

@@ -1,9 +1,11 @@
-use std::str::FromStr;
+use core::str::FromStr;
 
 use crate::parser;
 use crate::table::Iter;
 use crate::{Item, RawString, Table};
 
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 /// Type representing a TOML document
 #[derive(Debug, Clone)]
 pub struct Document {
@@ -11,7 +13,7 @@ pub struct Document {
     // Trailing comments and whitespaces
     pub(crate) trailing: RawString,
     pub(crate) original: Option<String>,
-    pub(crate) span: Option<std::ops::Range<usize>>,
+    pub(crate) span: Option<core::ops::Range<usize>>,
 }
 
 impl Document {
@@ -89,7 +91,7 @@ impl FromStr for Document {
     }
 }
 
-impl std::ops::Deref for Document {
+impl core::ops::Deref for Document {
     type Target = Table;
 
     fn deref(&self) -> &Self::Target {
@@ -97,7 +99,7 @@ impl std::ops::Deref for Document {
     }
 }
 
-impl std::ops::DerefMut for Document {
+impl core::ops::DerefMut for Document {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.as_table_mut()
     }

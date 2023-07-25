@@ -26,7 +26,7 @@ pre-release-replacements = [
 ]
 
 [features]
-default = []
+default = ["std"]
 perf = ["dep:kstring"]
 serde = ["dep:serde", "toml_datetime/serde", "dep:serde_spanned"]
 # Provide a method disable_recursion_limit to parse arbitrarily deep structures
@@ -35,13 +35,16 @@ serde = ["dep:serde", "toml_datetime/serde", "dep:serde_spanned"]
 # which may overflow the stack after deserialization has completed, including,
 # but not limited to, Display and Debug and Drop impls.
 unbounded = []
+std = ["serde/std", "toml_datetime/std", "kstring/std", "indexmap/std", "winnow/std"]
 
 [dependencies]
-indexmap = { version = "2.0.0", features = ["std"] }
-winnow = "0.5.0"
-serde = { version = "1.0.145", optional = true }
-kstring = { version = "2.0.0", features = ["max_inline"], optional = true }
-toml_datetime = { version = "0.6.3", path = "../toml_datetime" }
+hashbrown = { version = "0.14.0", default-features = false }
+indexmap = { version = "2.0.0", default-features = false }
+winnow = { version = "0.5.0", default-features = false, features = ["alloc"] }
+serde = { version = "1.0.145", optional = true, default-features = false }
+rustc-hash = { version = "1.1.0", default-features = false }
+kstring = { version = "2.0.0", features = ["max_inline"], optional = true, default-features = false }
+toml_datetime = { version = "0.6.3", path = "../toml_datetime", default-features = false }
 serde_spanned = { version = "0.6.3", path = "../serde_spanned", features = ["serde"], optional = true }
 
 [dev-dependencies]

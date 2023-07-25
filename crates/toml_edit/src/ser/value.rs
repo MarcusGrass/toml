@@ -1,4 +1,7 @@
 use super::Error;
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 /// Serialization for TOML [values][crate::Value].
 ///

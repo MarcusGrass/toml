@@ -2,6 +2,9 @@ use serde::de::value::BorrowedStrDeserializer;
 use serde::de::IntoDeserializer;
 
 use crate::de::Error;
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 pub(crate) struct DatetimeDeserializer {
     date: Option<crate::Datetime>,

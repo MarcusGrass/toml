@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use core::cell::RefCell;
 
 use winnow::combinator::cut_err;
 use winnow::combinator::eof;
@@ -22,6 +22,9 @@ use crate::table::TableKeyValue;
 use crate::Item;
 use crate::RawString;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 // ;; TOML
 
 // toml = expression *( newline expression )
@@ -120,7 +123,7 @@ pub(crate) fn parse_keyval(input: &mut Input<'_>) -> PResult<(Vec<Key>, TableKey
                 ),
             )),
         )
-            .try_map::<_, _, std::str::Utf8Error>(|(key, (_, v))| {
+            .try_map::<_, _, core::str::Utf8Error>(|(key, (_, v))| {
                 let mut path = key;
                 let key = path.pop().expect("grammar ensures at least 1");
 

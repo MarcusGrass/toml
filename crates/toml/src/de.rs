@@ -4,6 +4,8 @@
 //! into Rust structures. Note that some top-level functions here are also
 //! provided at the top of the crate.
 
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 /// Deserializes a string into a type.
 ///
 /// This function will attempt to interpret `s` as a TOML document and
@@ -67,7 +69,7 @@ impl Error {
 
     /// The start/end index into the original document where the error occurred
     #[cfg(feature = "parse")]
-    pub fn span(&self) -> Option<std::ops::Range<usize>> {
+    pub fn span(&self) -> Option<core::ops::Range<usize>> {
         self.inner.span()
     }
 }
@@ -75,18 +77,19 @@ impl Error {
 impl serde::de::Error for Error {
     fn custom<T>(msg: T) -> Self
     where
-        T: std::fmt::Display,
+        T: core::fmt::Display,
     {
         Error::new(crate::edit::de::Error::custom(msg))
     }
 }
 
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         self.inner.fmt(f)
     }
 }
 
+#[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
 /// Deserialization TOML document

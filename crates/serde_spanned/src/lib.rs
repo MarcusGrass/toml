@@ -13,6 +13,9 @@
 // something they couldn't detect (e.g. unsafe added via macro expansion, etc).
 #![forbid(unsafe_code)]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![no_std]
+
+extern crate alloc;
 
 mod spanned;
 pub use crate::spanned::Spanned;

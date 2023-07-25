@@ -1,10 +1,13 @@
-use std::fmt;
+use core::fmt;
 
 use serde::de;
 use serde::ser;
 
 use crate::map::Map;
 use crate::Value;
+
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 
 /// Type representing a TOML table, payload of the `Value::Table` variant.
 /// By default it is backed by a BTreeMap, enable the `preserve_order` feature
@@ -48,7 +51,7 @@ impl fmt::Display for Table {
 }
 
 #[cfg(feature = "parse")]
-impl std::str::FromStr for Table {
+impl core::str::FromStr for Table {
     type Err = crate::de::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         crate::from_str(s)

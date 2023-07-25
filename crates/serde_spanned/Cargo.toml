@@ -25,4 +25,4 @@ rustdoc-args = ["--cfg", "docsrs"]
 all-features = true
 
 [dependencies]
-serde = { version = "1.0.145", optional = true }
+serde = { version = "1.0.145", optional = true, default-features = false }

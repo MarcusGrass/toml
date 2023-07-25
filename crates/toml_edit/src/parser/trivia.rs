@@ -1,4 +1,4 @@
-use std::ops::RangeInclusive;
+use core::ops::RangeInclusive;
 
 use winnow::combinator::alt;
 use winnow::combinator::eof;
@@ -10,6 +10,9 @@ use winnow::token::one_of;
 use winnow::token::take_while;
 
 use crate::parser::prelude::*;
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 pub(crate) unsafe fn from_utf8_unchecked<'b>(
     bytes: &'b [u8],
@@ -17,9 +20,9 @@ pub(crate) unsafe fn from_utf8_unchecked<'b>(
 ) -> &'b str {
     if cfg!(debug_assertions) {
         // Catch problems more quickly when testing
-        std::str::from_utf8(bytes).expect(safety_justification)
+        core::str::from_utf8(bytes).expect(safety_justification)
     } else {
-        std::str::from_utf8_unchecked(bytes)
+        core::str::from_utf8_unchecked(bytes)
     }
 }
 
@@ -115,7 +118,7 @@ pub(crate) fn line_ending<'i>(input: &mut Input<'i>) -> PResult<&'i str> {
 
 // note: this rule is not present in the original grammar
 // line-trailing = ws [comment] skip-line-ending
-pub(crate) fn line_trailing(input: &mut Input<'_>) -> PResult<std::ops::Range<usize>> {
+pub(crate) fn line_trailing(input: &mut Input<'_>) -> PResult<core::ops::Range<usize>> {
     terminated((ws, opt(comment)).span(), line_ending).parse_next(input)
 }
 

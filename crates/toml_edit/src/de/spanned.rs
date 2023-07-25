@@ -2,9 +2,12 @@ use serde::de::value::BorrowedStrDeserializer;
 use serde::de::IntoDeserializer as _;
 
 use super::Error;
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 pub(crate) struct SpannedDeserializer<'de, T: serde::de::IntoDeserializer<'de, Error>> {
-    phantom_data: std::marker::PhantomData<&'de ()>,
+    phantom_data: core::marker::PhantomData<&'de ()>,
     start: Option<usize>,
     end: Option<usize>,
     value: Option<T>,
@@ -14,7 +17,7 @@ impl<'de, T> SpannedDeserializer<'de, T>
 where
     T: serde::de::IntoDeserializer<'de, Error>,
 {
-    pub(crate) fn new(value: T, span: std::ops::Range<usize>) -> Self {
+    pub(crate) fn new(value: T, span: core::ops::Range<usize>) -> Self {
         Self {
             phantom_data: Default::default(),
             start: Some(span.start),

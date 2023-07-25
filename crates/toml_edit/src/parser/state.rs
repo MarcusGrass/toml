@@ -4,9 +4,13 @@ use crate::repr::Decor;
 use crate::table::TableKeyValue;
 use crate::{ArrayOfTables, Document, InternalString, Item, RawString, Table};
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+
 pub(crate) struct ParseState {
     document: Document,
-    trailing: Option<std::ops::Range<usize>>,
+    trailing: Option<core::ops::Range<usize>>,
     current_table_position: usize,
     current_table: Table,
     current_is_array: bool,
@@ -21,7 +25,7 @@ impl ParseState {
         Ok(self.document)
     }
 
-    pub(crate) fn on_ws(&mut self, span: std::ops::Range<usize>) {
+    pub(crate) fn on_ws(&mut self, span: core::ops::Range<usize>) {
         if let Some(old) = self.trailing.take() {
             self.trailing = Some(old.start..span.end);
         } else {
@@ -29,7 +33,7 @@ impl ParseState {
         }
     }
 
-    pub(crate) fn on_comment(&mut self, span: std::ops::Range<usize>) {
+    pub(crate) fn on_comment(&mut self, span: core::ops::Range<usize>) {
         if let Some(old) = self.trailing.take() {
             self.trailing = Some(old.start..span.end);
         } else {
@@ -98,7 +102,7 @@ impl ParseState {
         &mut self,
         path: Vec<Key>,
         decor: Decor,
-        span: std::ops::Range<usize>,
+        span: core::ops::Range<usize>,
     ) -> Result<(), CustomError> {
         debug_assert!(!path.is_empty());
         debug_assert!(self.current_table.is_empty());
@@ -131,7 +135,7 @@ impl ParseState {
         &mut self,
         path: Vec<Key>,
         decor: Decor,
-        span: std::ops::Range<usize>,
+        span: core::ops::Range<usize>,
     ) -> Result<(), CustomError> {
         debug_assert!(!path.is_empty());
         debug_assert!(self.current_table.is_empty());
@@ -165,13 +169,13 @@ impl ParseState {
     }
 
     pub(crate) fn finalize_table(&mut self) -> Result<(), CustomError> {
-        let mut table = std::mem::take(&mut self.current_table);
-        let path = std::mem::take(&mut self.current_table_path);
+        let mut table = core::mem::take(&mut self.current_table);
+        let path = core::mem::take(&mut self.current_table_path);
 
         let root = self.document.as_table_mut();
         if path.is_empty() {
             assert!(root.is_empty());
-            std::mem::swap(&mut table, root);
+            core::mem::swap(&mut table, root);
         } else if self.current_is_array {
             let parent_table = Self::descend_path(root, &path[..path.len() - 1], false)?;
             let key = &path[path.len() - 1];
@@ -202,7 +206,7 @@ impl ParseState {
                     match entry.into_mut() {
                         // if [a.b.c] header preceded [a.b]
                         Item::Table(ref mut t) if t.implicit => {
-                            std::mem::swap(t, &mut table);
+                            core::mem::swap(t, &mut table);
                         }
                         _ => return Err(CustomError::duplicate_key(&path, path.len() - 1)),
                     }
@@ -263,8 +267,8 @@ impl ParseState {
     pub(crate) fn on_std_header(
         &mut self,
         path: Vec<Key>,
-        trailing: std::ops::Range<usize>,
-        span: std::ops::Range<usize>,
+        trailing: core::ops::Range<usize>,
+        span: core::ops::Range<usize>,
     ) -> Result<(), CustomError> {
         debug_assert!(!path.is_empty());
 
@@ -286,8 +290,8 @@ impl ParseState {
     pub(crate) fn on_array_header(
         &mut self,
         path: Vec<Key>,
-        trailing: std::ops::Range<usize>,
-        span: std::ops::Range<usize>,
+        trailing: core::ops::Range<usize>,
+        span: core::ops::Range<usize>,
     ) -> Result<(), CustomError> {
         debug_assert!(!path.is_empty());
 

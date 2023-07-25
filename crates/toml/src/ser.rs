@@ -4,6 +4,9 @@
 //! into TOML documents (as strings). Note that some top-level functions here
 //! are also provided at the top of the crate.
 
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
+
 /// Serialize the given data structure as a String of TOML.
 ///
 /// Serialization can fail if `T`'s implementation of `Serialize` decides to
@@ -80,7 +83,8 @@ pub struct Error {
 }
 
 impl Error {
-    pub(crate) fn new(inner: impl std::fmt::Display) -> Self {
+    pub(crate) fn new(inner: impl core::fmt::Display) -> Self {
+        use alloc::string::ToString;
         Self {
             inner: crate::edit::ser::Error::Custom(inner.to_string()),
         }
@@ -113,18 +117,19 @@ impl Error {
 impl serde::ser::Error for Error {
     fn custom<T>(msg: T) -> Self
     where
-        T: std::fmt::Display,
+        T: core::fmt::Display,
     {
         Error::new(msg)
     }
 }
 
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         self.inner.fmt(f)
     }
 }
 
+#[cfg(feature = "std")]
 impl std::error::Error for Error {}
 
 /// Serialization for TOML documents.
@@ -910,7 +915,7 @@ mod internal {
         mut settings: DocumentFormatter,
         value: Result<toml_edit::Value, crate::edit::ser::Error>,
     ) -> Result<(), Error> {
-        use std::fmt::Write;
+        use core::fmt::Write;
 
         let value = value.map_err(Error::wrap)?;
         let mut table = match toml_edit::Item::Value(value).into_table() {
@@ -1076,7 +1081,7 @@ mod internal {
         dst: &mut String,
         value: Result<toml_edit::Value, crate::edit::ser::Error>,
     ) -> Result<(), Error> {
-        use std::fmt::Write;
+        use core::fmt::Write;
 
         let value = value.map_err(Error::wrap)?;
 

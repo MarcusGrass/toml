@@ -10,6 +10,9 @@ use crate::{Array, Item, RawString, Value};
 
 use crate::parser::prelude::*;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 // ;; Array
 
 // array = array-open array-values array-close
@@ -56,7 +59,7 @@ pub(crate) fn array_values<'i>(
             ),
             ws_comment_newline.span(),
         )
-            .try_map::<_, _, std::str::Utf8Error>(|(array, trailing)| {
+            .try_map::<_, _, core::str::Utf8Error>(|(array, trailing)| {
                 let (mut array, comma) = array.unwrap_or_default();
                 array.set_trailing_comma(comma);
                 array.set_trailing(RawString::with_span(trailing));

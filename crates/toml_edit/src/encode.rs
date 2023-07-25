@@ -1,5 +1,5 @@
-use std::borrow::Cow;
-use std::fmt::{Display, Formatter, Result, Write};
+use alloc::borrow::Cow;
+use core::fmt::{Display, Formatter, Result, Write};
 
 use toml_datetime::*;
 
@@ -12,6 +12,10 @@ use crate::value::{
     DEFAULT_LEADING_VALUE_DECOR, DEFAULT_TRAILING_VALUE_DECOR, DEFAULT_VALUE_DECOR,
 };
 use crate::{Array, InlineTable, Item, Table, Value};
+
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 pub(crate) trait Encode {
     fn encode(
@@ -547,9 +551,9 @@ fn to_f64_repr(f: f64) -> Repr {
         (false, false, true) => "0.0".to_owned(),
         (_, false, false) => {
             if f % 1.0 == 0.0 {
-                format!("{}.0", f)
+                alloc::format!("{}.0", f)
             } else {
-                format!("{}", f)
+                alloc::format!("{}", f)
             }
         }
     };

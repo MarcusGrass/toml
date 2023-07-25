@@ -1,5 +1,4 @@
 #![allow(missing_docs)]
-
 //! Document tree traversal to walk a shared borrow of a document tree.
 //!
 //! Each method of the [`Visit`] trait is a hook that can be overridden
@@ -71,6 +70,9 @@
 //!
 //! For a more complex example where the visitor has internal state, see `examples/visit.rs`
 //! [on GitHub](https://github.com/ordian/toml_edit/blob/master/examples/visit.rs).
+
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 
 use crate::{
     Array, ArrayOfTables, Datetime, Document, Formatted, InlineTable, Item, Table, TableLike, Value,

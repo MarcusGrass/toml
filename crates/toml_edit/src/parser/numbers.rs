@@ -1,4 +1,4 @@
-use std::ops::RangeInclusive;
+use core::ops::RangeInclusive;
 
 use winnow::combinator::alt;
 use winnow::combinator::cut_err;
@@ -15,6 +15,9 @@ use winnow::trace::trace;
 use crate::parser::prelude::*;
 use crate::parser::trivia::from_utf8_unchecked;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 // ;; Boolean
 
 // boolean = true / false

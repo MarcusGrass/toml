@@ -3,9 +3,12 @@ use serde::de::IntoDeserializer as _;
 use crate::de::DatetimeDeserializer;
 use crate::de::Error;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 /// Deserialization implementation for TOML [values][crate::Value].
 ///
-/// Can be creater either directly from TOML strings, using [`std::str::FromStr`],
+/// Can be creater either directly from TOML strings, using [`core::str::FromStr`],
 /// or from parsed [values][crate::Value] using [`serde::de::IntoDeserializer::into_deserializer`].
 ///
 /// # Example
@@ -241,7 +244,7 @@ impl crate::Item {
     }
 }
 
-impl std::str::FromStr for ValueDeserializer {
+impl core::str::FromStr for ValueDeserializer {
     type Err = Error;
 
     /// Parses a value from a &str

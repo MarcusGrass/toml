@@ -15,6 +15,9 @@ pub(crate) mod value;
 
 pub use errors::TomlError;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 pub(crate) fn parse_document(raw: &str) -> Result<crate::Document, TomlError> {
     use prelude::*;
 

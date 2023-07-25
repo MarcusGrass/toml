@@ -1,5 +1,5 @@
-use std::iter::FromIterator;
-use std::str::FromStr;
+use core::iter::FromIterator;
+use core::str::FromStr;
 
 use toml_datetime::*;
 
@@ -7,6 +7,10 @@ use crate::key::Key;
 use crate::parser;
 use crate::repr::{Decor, Formatted};
 use crate::{Array, InlineTable, InternalString, RawString};
+
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 /// Representation of a TOML Value (as part of a Key/Value Pair).
 #[derive(Debug, Clone)]
@@ -206,7 +210,7 @@ impl Value {
     }
 
     /// Returns the location within the original document
-    pub(crate) fn span(&self) -> Option<std::ops::Range<usize>> {
+    pub(crate) fn span(&self) -> Option<core::ops::Range<usize>> {
         match self {
             Value::String(f) => f.span(),
             Value::Integer(f) => f.span(),
@@ -346,8 +350,8 @@ impl<K: Into<Key>, V: Into<Value>> FromIterator<(K, V)> for Value {
     }
 }
 
-impl std::fmt::Display for Value {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for Value {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         crate::encode::Encode::encode(self, f, None, ("", ""))
     }
 }

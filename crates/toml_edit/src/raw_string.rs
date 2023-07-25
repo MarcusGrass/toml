@@ -1,4 +1,8 @@
 use crate::InternalString;
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
 
 /// Opaque string storage for raw TOML; internal to `toml_edit`
 #[derive(PartialEq, Eq, Clone, Hash)]
@@ -8,11 +12,11 @@ pub struct RawString(RawStringInner);
 enum RawStringInner {
     Empty,
     Explicit(InternalString),
-    Spanned(std::ops::Range<usize>),
+    Spanned(core::ops::Range<usize>),
 }
 
 impl RawString {
-    pub(crate) fn with_span(span: std::ops::Range<usize>) -> Self {
+    pub(crate) fn with_span(span: core::ops::Range<usize>) -> Self {
         if span.start == span.end {
             RawString(RawStringInner::Empty)
         } else {
@@ -60,7 +64,7 @@ impl RawString {
     }
 
     /// Access the underlying span
-    pub(crate) fn span(&self) -> Option<std::ops::Range<usize>> {
+    pub(crate) fn span(&self) -> Option<core::ops::Range<usize>> {
         match &self.0 {
             RawStringInner::Empty => None,
             RawStringInner::Explicit(_) => None,
@@ -80,7 +84,7 @@ impl RawString {
         }
     }
 
-    pub(crate) fn encode(&self, buf: &mut dyn std::fmt::Write, input: &str) -> std::fmt::Result {
+    pub(crate) fn encode(&self, buf: &mut dyn core::fmt::Write, input: &str) -> core::fmt::Result {
         let raw = self.to_str(input);
         for part in raw.split('\r') {
             write!(buf, "{}", part)?;
@@ -90,10 +94,10 @@ impl RawString {
 
     pub(crate) fn encode_with_default(
         &self,
-        buf: &mut dyn std::fmt::Write,
+        buf: &mut dyn core::fmt::Write,
         input: Option<&str>,
         default: &str,
-    ) -> std::fmt::Result {
+    ) -> core::fmt::Result {
         let raw = self.to_str_with_default(input, default);
         for part in raw.split('\r') {
             write!(buf, "{}", part)?;
@@ -108,9 +112,9 @@ impl Default for RawString {
     }
 }
 
-impl std::fmt::Debug for RawString {
+impl core::fmt::Debug for RawString {
     #[inline]
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         match &self.0 {
             RawStringInner::Empty => write!(formatter, "empty"),
             RawStringInner::Explicit(s) => write!(formatter, "{:?}", s),

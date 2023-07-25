@@ -25,5 +25,9 @@ pre-release-replacements = [
 rustdoc-args = ["--cfg", "docsrs"]
 all-features = true
 
+[features]
+default = ["std"]
+std = ["serde/std"]
+
 [dependencies]
-serde = { version = "1.0.145", optional = true }
+serde = { version = "1.0.145", optional = true, default-features = false }

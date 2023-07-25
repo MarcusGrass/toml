@@ -1,11 +1,16 @@
 //! Definition of a TOML [value][Value]
 
-use std::collections::{BTreeMap, HashMap};
-use std::fmt;
-use std::hash::Hash;
-use std::mem::discriminant;
-use std::ops;
-use std::vec;
+use alloc::collections::BTreeMap;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::fmt;
+use core::hash::Hash;
+use core::mem::discriminant;
+use core::ops;
+
+#[cfg(not(feature = "std"))]
+use alloc::string::String;
+use hashbrown::HashMap;
 
 use serde::de;
 use serde::de::IntoDeserializer;
@@ -248,6 +253,7 @@ where
 impl<'a> From<&'a str> for Value {
     #[inline]
     fn from(val: &'a str) -> Value {
+        use alloc::string::ToString;
         Value::String(val.to_string())
     }
 }
@@ -388,7 +394,7 @@ impl fmt::Display for Value {
 }
 
 #[cfg(feature = "parse")]
-impl std::str::FromStr for Value {
+impl core::str::FromStr for Value {
     type Err = crate::de::Error;
     fn from_str(s: &str) -> Result<Value, Self::Err> {
         crate::from_str(s)
@@ -530,7 +536,7 @@ impl<'de> de::Deserialize<'de> for Value {
                     if let crate::map::Entry::Vacant(vacant) = map.entry(&key) {
                         vacant.insert(visitor.next_value()?);
                     } else {
-                        let msg = format!("duplicate key: `{}`", key);
+                        let msg = alloc::format!("duplicate key: `{}`", key);
                         return Err(de::Error::custom(msg));
                     }
                 }
@@ -550,6 +556,7 @@ impl<'de> de::Deserializer<'de> for Value {
     where
         V: de::Visitor<'de>,
     {
+        use alloc::string::ToString;
         match self {
             Value::Boolean(v) => visitor.visit_bool(v),
             Value::Integer(n) => visitor.visit_i64(n),
@@ -777,7 +784,7 @@ impl<'de> serde::de::VariantAccess<'de> for MapEnumDeserializer {
                     Err(Error::custom("expected empty table"))
                 }
             }
-            e => Err(Error::custom(format!(
+            e => Err(Error::custom(alloc::format!(
                 "expected table, found {}",
                 e.type_str()
             ))),
@@ -803,9 +810,10 @@ impl<'de> serde::de::VariantAccess<'de> for MapEnumDeserializer {
                     .enumerate()
                     .map(|(index, (key, value))| match key.parse::<usize>() {
                         Ok(key_index) if key_index == index => Ok(value),
-                        Ok(_) | Err(_) => Err(Error::custom(format!(
+                        Ok(_) | Err(_) => Err(Error::custom(alloc::format!(
                             "expected table key `{}`, but was `{}`",
-                            index, key
+                            index,
+                            key
                         ))),
                     })
                     // Fold all values into a `Vec`, or return the first error.
@@ -826,10 +834,13 @@ impl<'de> serde::de::VariantAccess<'de> for MapEnumDeserializer {
                         visitor,
                     )
                 } else {
-                    Err(Error::custom(format!("expected tuple with length {}", len)))
+                    Err(Error::custom(alloc::format!(
+                        "expected tuple with length {}",
+                        len
+                    )))
                 }
             }
-            e => Err(Error::custom(format!(
+            e => Err(Error::custom(alloc::format!(
                 "expected table, found {}",
                 e.type_str()
             ))),
@@ -930,6 +941,7 @@ impl ser::Serializer for ValueSerializer {
     }
 
     fn serialize_str(self, value: &str) -> Result<Value, crate::ser::Error> {
+        use alloc::borrow::ToOwned;
         Ok(Value::String(value.to_owned()))
     }
 
@@ -976,6 +988,7 @@ impl ser::Serializer for ValueSerializer {
     where
         T: ser::Serialize,
     {
+        use alloc::borrow::ToOwned;
         let value = value.serialize(ValueSerializer)?;
         let mut table = Table::new();
         table.insert(variant.to_owned(), value);
@@ -1157,6 +1170,7 @@ impl ser::Serializer for TableSerializer {
     where
         T: ser::Serialize,
     {
+        use alloc::borrow::ToOwned;
         let value = value.serialize(ValueSerializer)?;
         let mut table = Table::new();
         table.insert(variant.to_owned(), value);

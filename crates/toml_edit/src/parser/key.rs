@@ -1,4 +1,4 @@
-use std::ops::RangeInclusive;
+use core::ops::RangeInclusive;
 
 use winnow::combinator::peek;
 use winnow::combinator::separated1;
@@ -15,6 +15,9 @@ use crate::repr::{Decor, Repr};
 use crate::InternalString;
 use crate::RawString;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 // key = simple-key / dotted-key
 // dotted-key = simple-key 1*( dot-sep simple-key )
 pub(crate) fn key(input: &mut Input<'_>) -> PResult<Vec<Key>> {
@@ -48,7 +51,7 @@ pub(crate) fn simple_key(input: &mut Input<'_>) -> PResult<(RawString, InternalS
         "simple-key",
         dispatch! {peek(any);
             crate::parser::strings::QUOTATION_MARK => basic_string
-                .map(|s: std::borrow::Cow<'_, str>| s.as_ref().into()),
+                .map(|s: alloc::borrow::Cow<'_, str>| s.as_ref().into()),
             crate::parser::strings::APOSTROPHE => literal_string.map(|s: &str| s.into()),
             _ => unquoted_key.map(|s: &str| s.into()),
         }

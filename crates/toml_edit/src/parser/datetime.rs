@@ -1,4 +1,4 @@
-use std::ops::RangeInclusive;
+use core::ops::RangeInclusive;
 
 use crate::parser::errors::CustomError;
 use crate::parser::prelude::*;
@@ -13,6 +13,9 @@ use winnow::token::one_of;
 use winnow::token::take_while;
 use winnow::trace::trace;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 // ;; Date and Time (as defined in RFC 3339)
 
 // date-time = offset-date-time / local-date-time / local-date / local-time

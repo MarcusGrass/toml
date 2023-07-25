@@ -1,6 +1,5 @@
-use std::error;
-use std::fmt;
-use std::str::{self, FromStr};
+use core::fmt;
+use core::str::{self, FromStr};
 
 #[cfg(feature = "serde")]
 use serde::{de, ser};
@@ -232,7 +231,7 @@ impl fmt::Display for Time {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:02}:{:02}:{:02}", self.hour, self.minute, self.second)?;
         if self.nanosecond != 0 {
-            let s = format!("{:09}", self.nanosecond);
+            let s = alloc::format!("{:09}", self.nanosecond);
             write!(f, ".{}", s.trim_end_matches('0'))?;
         }
         Ok(())
@@ -462,6 +461,8 @@ impl ser::Serialize for Datetime {
     where
         S: ser::Serializer,
     {
+        #[cfg(not(feature = "std"))]
+        use alloc::string::ToString;
         use serde::ser::SerializeStruct;
 
         let mut s = serializer.serialize_struct(NAME, 1)?;
@@ -580,4 +581,5 @@ impl fmt::Display for DatetimeParseError {
     }
 }
 
-impl error::Error for DatetimeParseError {}
+#[cfg(feature = "std")]
+impl std::error::Error for DatetimeParseError {}

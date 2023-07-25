@@ -1,12 +1,17 @@
-use std::iter::FromIterator;
+use core::iter::FromIterator;
 
 use crate::{Array, Item, Table};
 
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 /// Type representing a TOML array of tables
 #[derive(Clone, Debug, Default)]
 pub struct ArrayOfTables {
     // Always Vec<Item::Table>, just `Item` to make `Index` work
-    pub(crate) span: Option<std::ops::Range<usize>>,
+    pub(crate) span: Option<core::ops::Range<usize>>,
     pub(crate) values: Vec<Item>,
 }
 
@@ -33,7 +38,7 @@ impl ArrayOfTables {
     }
 
     /// Returns the location within the original document
-    pub(crate) fn span(&self) -> Option<std::ops::Range<usize>> {
+    pub(crate) fn span(&self) -> Option<core::ops::Range<usize>> {
         self.span.clone()
     }
 
@@ -158,8 +163,8 @@ impl<'s> IntoIterator for &'s ArrayOfTables {
     }
 }
 
-impl std::fmt::Display for ArrayOfTables {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for ArrayOfTables {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         // HACK: Without the header, we don't really have a proper way of printing this
         self.clone().into_array().fmt(f)
     }

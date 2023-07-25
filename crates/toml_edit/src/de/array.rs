@@ -1,12 +1,14 @@
 use crate::de::Error;
-
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 pub(crate) struct ArrayDeserializer {
     input: Vec<crate::Item>,
-    span: Option<std::ops::Range<usize>>,
+    span: Option<core::ops::Range<usize>>,
 }
 
 impl ArrayDeserializer {
-    pub(crate) fn new(input: Vec<crate::Item>, span: Option<std::ops::Range<usize>>) -> Self {
+    pub(crate) fn new(input: Vec<crate::Item>, span: Option<core::ops::Range<usize>>) -> Self {
         Self { input, span }
     }
 }
@@ -69,7 +71,7 @@ impl crate::ArrayOfTables {
 }
 
 pub(crate) struct ArraySeqAccess {
-    iter: std::vec::IntoIter<crate::Item>,
+    iter: alloc::vec::IntoIter<crate::Item>,
 }
 
 impl ArraySeqAccess {

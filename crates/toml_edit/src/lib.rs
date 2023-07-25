@@ -1,7 +1,8 @@
-#![deny(missing_docs)]
 // https://github.com/Marwes/combine/issues/172
 #![recursion_limit = "256"]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(all(not(feature = "std"), not(test)), no_std)]
+#![allow(unused_imports)]
 
 //! # `toml_edit`
 //!
@@ -64,6 +65,8 @@
 //! [`toml`]: https://docs.rs/toml/latest/toml/
 //! [test]: https://github.com/ordian/toml_edit/blob/f09bd5d075fdb7d2ef8d9bb3270a34506c276753/tests/test_valid.rs#L84
 
+extern crate alloc;
+
 mod array;
 mod array_of_tables;
 mod document;
@@ -108,12 +111,16 @@ pub use crate::table::{
 pub use crate::value::Value;
 pub use toml_datetime::*;
 
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
+
 // Prevent users from some traits.
 pub(crate) mod private {
     pub trait Sealed {}
     impl Sealed for usize {}
     impl Sealed for str {}
-    impl Sealed for String {}
+    impl Sealed for alloc::string::String {}
     impl Sealed for i64 {}
     impl Sealed for f64 {}
     impl Sealed for bool {}

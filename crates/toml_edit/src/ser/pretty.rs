@@ -1,4 +1,7 @@
 pub(crate) struct Pretty;
+use alloc::borrow::ToOwned;
+use alloc::string::{String, ToString};
+use alloc::vec::Vec;
 
 impl crate::visit_mut::VisitMut for Pretty {
     fn visit_document_mut(&mut self, node: &mut crate::Document) {
